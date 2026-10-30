@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sporty — Account &amp; Profile Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#141210; --panel:#1D1A15; --panel-2:#241F18; --line:#332C22;
+    --ink:#EFE8D8; --ink-dim:#9C927D; --amber:#F2A93B; --amber-dim:#8A6A2C;
+    --teal:#57BFB6; --red:#E2604F; --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.02em;}
+  .wrap{max-width:640px; margin:0 auto; padding:20px 16px 50px;}
+
+  header.top{text-align:center; margin-bottom:22px;}
+  header.top h1{font-size:26px; font-weight:700; margin:0; color:var(--ink);}
+  header.top h1 span{color:var(--amber);}
+  header.top p{font-size:12px; color:var(--ink-dim); margin:4px 0 0;}
+
+  .progress-track{display:flex; gap:5px; margin:18px 0 24px;}
+  .progress-track .seg{flex:1; height:4px; background:var(--line); border-radius:2px;}
+  .progress-track .seg.done{background:var(--amber);}
+  .progress-track .seg.current{background:var(--teal);}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:22px 20px;}
+  .step-label{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--amber); font-weight:600;}
+  .step-title{font-family:'Oswald'; font-size:22px; font-weight:600; margin:4px 0 6px; text-transform:uppercase;}
+  .step-sub{font-size:13px; color:var(--ink-dim); margin:0 0 20px; line-height:1.45;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-dim); margin-bottom:6px;}
+  .field input[type=text], .field input[type=number], .field input[type=email], .field input[type=tel],
+  .field input[type=password], .field select, .field textarea{
+    width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--ink);
+    padding:11px 12px; font-family:'Inter'; font-size:14px; border-radius:var(--radius);
+  }
+  .field textarea{resize:vertical; min-height:70px; font-family:'Inter';}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--amber-dim);}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .field-error{font-size:11px; color:var(--red); margin-top:5px; display:none;}
+  .field-error.show{display:block;}
+
+  .chip-grid{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px;}
+  .chip{
+    padding:10px 16px; font-size:13px; font-weight:600; cursor:pointer;
+    border:1px solid var(--line); background:var(--panel-2); color:var(--ink-dim);
+    border-radius:var(--radius); user-select:none;
+  }
+  .chip.active{border-color:var(--amber); color:var(--amber); background:#2A2110;}
+  .chip small{display:block; font-size:10px; font-weight:400; color:var(--ink-dim); margin-top:2px;}
+  .chip.active small{color:var(--amber-dim);}
+  .chip.warn.active{border-color:var(--red); color:var(--red); background:#2A1512;}
+
+  .toggle-pair{display:flex; gap:10px;}
+  .toggle-pair .chip{flex:1; text-align:center;}
+
+  .tab-row{display:flex; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin-bottom:20px;}
+  .tab-row .tab{flex:1; text-align:center; padding:11px; font-size:13px; font-weight:600; cursor:pointer; color:var(--ink-dim); background:var(--panel-2);}
+  .tab-row .tab.active{background:var(--amber); color:#141210;}
+
+  .otp-row{display:flex; gap:8px;}
+  .otp-row input{flex:1;}
+  .otp-note{font-size:12px; color:var(--teal); background:var(--panel-2); border:1px dashed var(--teal); padding:10px 12px; border-radius:var(--radius); margin-top:10px; display:none;}
+  .otp-note.show{display:block;}
+  .otp-status{font-size:12px; margin-top:8px; color:var(--ink-dim);}
+  .otp-status.ok{color:var(--teal);}
+  .otp-status.err{color:var(--red);}
+
+  button{
+    font-family:'Inter'; font-weight:600; font-size:13px; border:1px solid var(--amber-dim);
+    background:transparent; color:var(--ink); padding:11px 18px; cursor:pointer; border-radius:var(--radius);
+  }
+  button.primary{background:var(--amber); color:#141210; border-color:var(--amber);}
+  button.primary:hover{background:#ffbf5c;}
+  button.ghost{border-color:var(--line); color:var(--ink-dim);}
+  button:disabled{opacity:.4; cursor:not-allowed;}
+  .nav-row{display:flex; justify-content:space-between; margin-top:24px;}
+  .link-btn{background:none; border:none; color:var(--teal); font-size:12px; text-decoration:underline; padding:0; cursor:pointer;}
+
+  .summary-list{list-style:none; margin:0; padding:0; font-size:13px;}
+  .summary-list li{display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-bottom:1px solid var(--line); color:var(--ink-dim);}
+  .summary-list li b{color:var(--ink); font-weight:600; text-align:right;}
+  .summary-list.section-head{margin-top:14px; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--amber); border-bottom:none; padding-bottom:2px;}
+
+  .avatar-row{display:flex; gap:10px; margin-bottom:16px;}
+  .avatar{width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'Oswald'; font-weight:700; font-size:18px; cursor:pointer; border:2px solid transparent; color:#141210;}
+  .avatar.active{border-color:var(--ink);}
+
+  .switch-row{display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line); font-size:13px;}
+  .switch-row:last-child{border-bottom:none;}
+  .switch{width:38px; height:20px; background:var(--line); border-radius:10px; position:relative; cursor:pointer; flex-shrink:0;}
+  .switch.on{background:var(--teal);}
+  .switch .dot{position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:var(--ink); transition:left .15s;}
+  .switch.on .dot{left:20px;}
+
+  .field-note{font-size:11px; color:var(--ink-dim); line-height:1.5; margin-top:8px;}
+  .field-note.caution{color:var(--red);}
+  .disclaimer{font-size:11px; color:var(--ink-dim); text-align:center; margin-top:18px; line-height:1.6;}
+  .badge-demo{display:inline-block; font-size:10px; color:var(--amber); border:1px solid var(--amber-dim); padding:2px 7px; border-radius:10px; margin-left:8px; vertical-align:middle;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>SPO<span>RTY</span></h1>
+    <p>Account setup and training profile</p>
+  </header>
+
+  <div class="progress-track" id="progressTrack"></div>
+
+  <div class="card" id="stepCard"></div>
+
+  <p class="disclaimer">Nothing here is uploaded anywhere — accounts and profile data stay in this browser tab only. This is a prototype login (no real server), same as the demo OTP below.</p>
+</div>
+
+<script>
+/* ---------------------------------------------------------------------
+   All state lives in memory only (no localStorage/sessionStorage) —
+   cleared on refresh, consistent with Sporty's own privacy approach.
+   The "account store" below is a demo stand-in for a real backend.
+--------------------------------------------------------------------- */
+const demoAccounts = {
+  'demo@sporty.app': { password:'sporty123', name:'Demo User' }
+};
+
+const profile = {
+  authMode: 'signup', email:'', password:'',
+  contact: '', otpVerified: false,
+  name: '', age: '', gender: '',
+  height: '', weight: '',
+  hasInjury: '', ptStatus: '', cautionAreas: [], healthNotes: '',
+  fitnessLevel: '', goal: '',
+  preferences: [], targetExercises: [],
+  duration: '20', customDuration: '',
+  experience: '', camera: '',
+  avatar: 'S', reminders: true, units: 'metric',
+};
+
+let sentOtp = null;
+
+const STEPS_SIGNUP = ['auth','verify','personal','body','health','level','goal','preference','targets','duration','experience','camera','profile','summary'];
+const STEPS_LOGIN  = ['auth','welcome'];
+let activeSteps = ['auth'];
+let stepIndex = 0;
+
+const progressTrack = document.getElementById('progressTrack');
+const stepCard = document.getElementById('stepCard');
+
+function renderProgress(){
+  progressTrack.innerHTML = activeSteps.map((s,i)=>{
+    const cls = i < stepIndex ? 'done' : (i === stepIndex ? 'current' : '');
+    return `<div class="seg ${cls}"></div>`;
+  }).join('');
+}
+
+function go(delta){
+  stepIndex = Math.max(0, Math.min(activeSteps.length-1, stepIndex+delta));
+  render();
+}
+
+function toggleInArray(arr, val){
+  const i = arr.indexOf(val);
+  if(i>-1) arr.splice(i,1); else arr.push(val);
+}
+
+/* Builds the URL that hands off to sporty.html. Only sends fields Sporty
+   actually has matching controls for (age/height/weight in its Body
+   Profile panel, and one exercise/pose to preselect) — fields with no
+   equivalent in Sporty (fitness level, goal, duration, camera side, etc.)
+   are intentionally NOT sent, since there's nothing there to receive them. */
+function buildSportyUrl(){
+  const p = new URLSearchParams();
+  if(profile.name) p.set('name', profile.name);
+  if(profile.age) p.set('age', profile.age);
+  if(profile.height) p.set('height', profile.height);
+  if(profile.weight) p.set('weight', profile.weight);
+  if(profile.targetExercises.length) p.set('exercise', profile.targetExercises[0].toLowerCase());
+  const qs = p.toString();
+  return 'sporty.html' + (qs ? ('?' + qs) : '');
+}
+
+function navButtons(nextLabel, nextEnabled, opts){
+  opts = opts || {};
+  return `
+    <div class="nav-row">
+      ${stepIndex>0 ? `<button class="ghost" onclick="go(-1)">◀ Back</button>` : `<span></span>`}
+      <button class="primary" id="nextBtn" ${nextEnabled?'':'disabled'} onclick="${opts.onNext || 'go(1)'}">${nextLabel}</button>
+    </div>`;
+}
+
+function render(){
+  renderProgress();
+  const step = activeSteps[stepIndex];
+  stepCard.innerHTML = RENDERERS[step]();
+  wireStep(step);
+}
+
+/* ---------------------------------------------------------------------
+   Step renderers
+--------------------------------------------------------------------- */
+const RENDERERS = {
+
+auth: () => `
+  <div class="step-label">Account <span class="badge-demo">prototype login</span></div>
+  <div class="step-title">${profile.authMode==='signup' ? 'Create your account' : 'Log in'}</div>
+  <div class="tab-row">
+    <div class="tab ${profile.authMode==='signup'?'active':''}" data-mode="signup">Sign Up</div>
+    <div class="tab ${profile.authMode==='login'?'active':''}" data-mode="login">Log In</div>
+  </div>
+
+  ${profile.authMode==='signup' ? `
+    <p class="step-sub">A few details to create your Sporty profile.</p>
+    <div class="field">
+      <label>Full name</label>
+      <input type="text" id="suName" placeholder="e.g. Aditi Sharma" value="${profile.name}">
+    </div>
+    <div class="field">
+      <label>Email or phone</label>
+      <input type="text" id="suEmail" placeholder="you@example.com" value="${profile.email}">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="suPass" placeholder="At least 6 characters">
+      </div>
+      <div class="field">
+        <label>Confirm password</label>
+        <input type="password" id="suPass2" placeholder="Repeat password">
+      </div>
+    </div>
+    <div class="field-error" id="authError"></div>
+    <div class="nav-row">
+      <span></span>
+      <button class="primary" id="authNextBtn">Create account →</button>
+    </div>
+  ` : `
+    <p class="step-sub">Demo account — try <b style="color:var(--ink)">demo@sporty.app</b> / <b style="color:var(--ink)">sporty123</b>.</p>
+    <div class="field">
+      <label>Email or phone</label>
+      <input type="text" id="liEmail" value="${profile.email}">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="liPass">
+    </div>
+    <div class="field-error" id="authError"></div>
+    <div class="nav-row">
+      <span></span>
+      <button class="primary" id="authNextBtn">Log in →</button>
+    </div>
+  `}
+`,
+
+verify: () => `
+  <div class="step-label">Step 2 of 14</div>
+  <div class="step-title">Verify it's you</div>
+  <p class="step-sub">Demo OTP flow — since there's no backend here, the code is shown to you directly instead of actually being texted/emailed.</p>
+  <div class="field">
+    <label>Phone or email to verify</label>
+    <input type="text" id="contactInput" placeholder="you@example.com or +91 90000 00000" value="${profile.contact || profile.email}">
+  </div>
+  <div class="otp-row">
+    <input type="text" id="otpInput" placeholder="Enter 6-digit code" maxlength="6" ${sentOtp?'':'disabled'}>
+    <button class="ghost" id="sendOtpBtn">Send code</button>
+  </div>
+  <div class="otp-note" id="otpNote"></div>
+  <div class="otp-status" id="otpStatus"></div>
+  ${navButtons('Continue', profile.otpVerified)}
+`,
+
+personal: () => `
+  <div class="step-label">Step 3 of 14 — Personal Details</div>
+  <div class="step-title">About you</div>
+  <p class="step-sub">Age and gender help tailor your readiness and calorie estimates.</p>
+  <div class="field-row">
+    <div class="field">
+      <label>Age</label>
+      <input type="number" id="ageInput" min="10" max="99" value="${profile.age}">
+    </div>
+    <div class="field">
+      <label>Gender</label>
+      <select id="genderInput">
+        <option value="">Select</option>
+        <option ${profile.gender==='Female'?'selected':''}>Female</option>
+        <option ${profile.gender==='Male'?'selected':''}>Male</option>
+        <option ${profile.gender==='Other'?'selected':''}>Other</option>
+        <option ${profile.gender==='Prefer not to say'?'selected':''}>Prefer not to say</option>
+      </select>
+    </div>
+  </div>
+  ${navButtons('Continue', true)}
+`,
+
+body: () => `
+  <div class="step-label">Step 4 of 14 — Body Details</div>
+  <div class="step-title">Height and weight</div>
+  <p class="step-sub">Used for a friendlier summary — Sporty's own Body Profile panel inside the app is what actually drives calorie/HR estimates during training.</p>
+  <div class="field-row">
+    <div class="field">
+      <label>Height (cm)</label>
+      <input type="number" id="heightInput" min="120" max="220" value="${profile.height}">
+    </div>
+    <div class="field">
+      <label>Weight (kg)</label>
+      <input type="number" id="weightInput" min="30" max="200" value="${profile.weight}">
+    </div>
+  </div>
+  ${navButtons('Continue', true)}
+`,
+
+health: () => `
+  <div class="step-label">Step 5 of 14 — Health &amp; Physical Therapy</div>
+  <div class="step-title">Any injuries or care to know about?</div>
+  <p class="step-sub">Optional, but it helps Sporty's coach phrase advice more carefully around areas you flag. This never replaces a doctor or physiotherapist.</p>
+
+  <div class="field">
+    <label>Current injury or medical condition affecting movement?</label>
+    <div class="toggle-pair">
+      <div class="chip ${profile.hasInjury==='no'?'active':''}" data-field="hasInjury" data-v="no">No</div>
+      <div class="chip warn ${profile.hasInjury==='yes'?'active':''}" data-field="hasInjury" data-v="yes">Yes</div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Currently undergoing physical therapy / rehab?</label>
+    <div class="toggle-pair">
+      <div class="chip ${profile.ptStatus==='no'?'active':''}" data-field="ptStatus" data-v="no">No</div>
+      <div class="chip warn ${profile.ptStatus==='yes'?'active':''}" data-field="ptStatus" data-v="yes">Yes</div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Areas to be cautious with (pick any)</label>
+    <div class="chip-grid" id="cautionGrid">
+      ${['Knees','Lower back','Shoulders','Wrists','Ankles','Neck','None'].map(v=>`<div class="chip ${profile.cautionAreas.includes(v)?'active':''}" data-v="${v}">${v}</div>`).join('')}
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Notes for your coach (optional)</label>
+    <textarea id="healthNotes" placeholder="e.g. mild knee soreness after long runs, cleared for light training">${profile.healthNotes}</textarea>
+  </div>
+
+  <p class="field-note caution">If you have a current injury or are in physical therapy, please follow your therapist's or doctor's guidance over any in-app suggestion, and stop immediately if something hurts.</p>
+  ${navButtons('Continue', true)}
+`,
+
+level: () => `
+  <div class="step-label">Step 6 of 14 — Fitness Level</div>
+  <div class="step-title">How would you rate yourself?</div>
+  <p class="step-sub">Pick one.</p>
+  <div class="chip-grid" id="levelGrid">
+    ${['Beginner','Intermediate','Advanced'].map(v=>`<div class="chip ${profile.fitnessLevel===v?'active':''}" data-v="${v}">${v}</div>`).join('')}
+  </div>
+  ${navButtons('Continue', !!profile.fitnessLevel)}
+`,
+
+goal: () => `
+  <div class="step-label">Step 7 of 14 — Fitness Goal</div>
+  <div class="step-title">What are you training for?</div>
+  <p class="step-sub">Pick your main goal.</p>
+  <div class="chip-grid" id="goalGrid">
+    ${['Weight Loss','Muscle Gain','General Fitness','Flexibility'].map(v=>`<div class="chip ${profile.goal===v?'active':''}" data-v="${v}">${v}</div>`).join('')}
+  </div>
+  ${navButtons('Continue', !!profile.goal)}
+`,
+
+preference: () => `
+  <div class="step-label">Step 8 of 14 — Exercise Preference</div>
+  <div class="step-title">What do you enjoy?</div>
+  <p class="step-sub">Pick as many as apply.</p>
+  <div class="chip-grid" id="prefGrid">
+    ${['Strength','Cardio','Yoga','Home Workout'].map(v=>`<div class="chip ${profile.preferences.includes(v)?'active':''}" data-v="${v}">${v}</div>`).join('')}
+  </div>
+  ${navButtons('Continue', profile.preferences.length>0)}
+`,
+
+targets: () => `
+  <div class="step-label">Step 9 of 14 — Target Exercises</div>
+  <div class="step-title">Which moves do you want to focus on?</div>
+  <p class="step-sub">These map directly to what Sporty tracks today.</p>
+  <div class="chip-grid" id="targetGrid">
+    ${['Squat','Push-up','Bicep Curl','Plank','Lunge','Overhead Press','Tree Pose','Warrior II','Surya Namaskar'].map(v=>`<div class="chip ${profile.targetExercises.includes(v)?'active':''}" data-v="${v}">${v}</div>`).join('')}
+  </div>
+  ${navButtons('Continue', profile.targetExercises.length>0)}
+`,
+
+duration: () => `
+  <div class="step-label">Step 10 of 14 — Workout Duration</div>
+  <div class="step-title">How long per session?</div>
+  <p class="step-sub">Pick a preset or set your own.</p>
+  <div class="chip-grid" id="durationGrid">
+    ${['10 min','20 min','30 min','Custom'].map(v=>{
+      const active = (v==='Custom' && profile.duration==='custom') || (v!=='Custom' && profile.duration===v.split(' ')[0]);
+      return `<div class="chip ${active?'active':''}" data-v="${v}">${v}</div>`;
+    }).join('')}
+  </div>
+  <div class="field" id="customDurationField" style="display:${profile.duration==='custom'?'block':'none'};">
+    <label>Custom duration (minutes)</label>
+    <input type="number" id="customDurationInput" min="5" max="120" value="${profile.customDuration}">
+  </div>
+  ${navButtons('Continue', true)}
+`,
+
+experience: () => `
+  <div class="step-label">Step 11 of 14 — Experience</div>
+  <div class="step-title">Tell us where you're starting from</div>
+  <div class="toggle-pair" id="experienceGrid">
+    <div class="chip ${profile.experience==='new'?'active':''}" data-v="new">New to exercise</div>
+    <div class="chip ${profile.experience==='regular'?'active':''}" data-v="regular">Regularly exercises</div>
+  </div>
+  ${navButtons('Continue', !!profile.experience)}
+`,
+
+camera: () => `
+  <div class="step-label">Step 12 of 14 — Camera Setup</div>
+  <div class="step-title">How will you position your camera?</div>
+  <p class="step-sub">Front camera works best for most exercises; side camera can help for lunges and forward folds.</p>
+  <div class="toggle-pair" id="cameraGrid">
+    <div class="chip ${profile.camera==='front'?'active':''}" data-v="front">Front Camera</div>
+    <div class="chip ${profile.camera==='side'?'active':''}" data-v="side">Side Camera</div>
+  </div>
+  ${navButtons('Continue', !!profile.camera)}
+`,
+
+profile: () => `
+  <div class="step-label">Step 13 of 14 — Profile Settings</div>
+  <div class="step-title">Finishing touches</div>
+  <div class="avatar-row" id="avatarRow">
+    ${['S','A','T','Y'].map((l,i)=>{
+      const colors = ['#F2A93B','#57BFB6','#E2604F','#8A6A2C'];
+      return `<div class="avatar ${profile.avatar===l?'active':''}" data-v="${l}" style="background:${colors[i]}">${l}</div>`;
+    }).join('')}
+  </div>
+  <div class="switch-row">
+    <span>Workout reminders</span>
+    <div class="switch ${profile.reminders?'on':''}" id="remindersSwitch"><div class="dot"></div></div>
+  </div>
+  <div class="switch-row">
+    <span>Units</span>
+    <div class="chip-grid" style="margin:0;">
+      <div class="chip ${profile.units==='metric'?'active':''}" data-v="metric" id="unitMetric" style="padding:6px 12px; font-size:11px;">Metric (kg/cm)</div>
+      <div class="chip ${profile.units==='imperial'?'active':''}" data-v="imperial" id="unitImperial" style="padding:6px 12px; font-size:11px;">Imperial (lb/ft)</div>
+    </div>
+  </div>
+  ${navButtons('Review summary', true)}
+`,
+
+welcome: () => `
+  <div class="step-label">Welcome back</div>
+  <div class="step-title">Hi, ${profile.name || 'there'} 👋</div>
+  <p class="step-sub">Logged in as <b style="color:var(--ink)">${profile.email}</b>. Your training profile from sign-up isn't stored anywhere between sessions in this prototype, so head straight into Sporty when ready — or set up a fresh profile.</p>
+  <div class="nav-row">
+    <button class="ghost" id="freshProfileBtn">Set up profile instead</button>
+    <button class="primary" id="launchFromLoginBtn">Start Training in Sporty →</button>
+  </div>
+`,
+
+summary: () => {
+  const rows1 = [
+    ['Account', profile.email || '—'],
+    ['Name', profile.name || '—'],
+    ['Age / Gender', `${profile.age||'—'} / ${profile.gender||'—'}`],
+    ['Height / Weight', `${profile.height||'—'} cm / ${profile.weight||'—'} kg`],
+  ];
+  const rows2 = [
+    ['Injury / condition', profile.hasInjury==='yes' ? 'Yes' : 'No'],
+    ['Physical therapy', profile.ptStatus==='yes' ? 'Yes' : 'No'],
+    ['Caution areas', profile.cautionAreas.join(', ') || 'None flagged'],
+  ];
+  const rows3 = [
+    ['Fitness level', profile.fitnessLevel || '—'],
+    ['Goal', profile.goal || '—'],
+    ['Preferences', profile.preferences.join(', ') || '—'],
+    ['Target exercises', profile.targetExercises.join(', ') || '—'],
+    ['Duration', profile.duration==='custom' ? `${profile.customDuration||'—'} min (custom)` : `${profile.duration} min`],
+    ['Experience', profile.experience==='new' ? 'New to exercise' : 'Regularly exercises'],
+    ['Camera setup', profile.camera==='front' ? 'Front camera' : 'Side camera'],
+    ['Units', profile.units],
+  ];
+  const section = (title, rows) => `
+    <div class="summary-list section-head">${title}</div>
+    <ul class="summary-list">${rows.map(([k,v])=>`<li><span>${k}</span><b>${v}</b></li>`).join('')}</ul>
+  `;
+  return `
+  <div class="step-label">All set</div>
+  <div class="step-title">Your profile summary</div>
+  <p class="step-sub">Review before you start. You can change any of Sporty's own settings (Body Profile, Readiness, Skeleton display, etc.) inside the app itself at any time.</p>
+  ${section('Account', rows1)}
+  ${section('Health', rows2)}
+  ${section('Training', rows3)}
+  <div class="nav-row">
+    <button class="ghost" onclick="go(-1)">◀ Back</button>
+    <button class="primary" id="launchBtn">Start Training in Sporty →</button>
+  </div>
+  `;
+}
+};
+
+/* ---------------------------------------------------------------------
+   Per-step wiring
+--------------------------------------------------------------------- */
+function wireStep(step){
+
+  if(step === 'auth'){
+    document.querySelectorAll('.tab-row .tab').forEach(t=>{
+      t.addEventListener('click', ()=>{ profile.authMode = t.dataset.mode; render(); });
+    });
+
+    const err = document.getElementById('authError');
+    document.getElementById('authNextBtn').addEventListener('click', ()=>{
+      err.classList.remove('show');
+      if(profile.authMode === 'signup'){
+        const name = document.getElementById('suName').value.trim();
+        const email = document.getElementById('suEmail').value.trim();
+        const pass = document.getElementById('suPass').value;
+        const pass2 = document.getElementById('suPass2').value;
+        if(!name || !email || !pass){ err.textContent = 'Fill in all fields.'; err.classList.add('show'); return; }
+        if(pass.length < 6){ err.textContent = 'Password needs at least 6 characters.'; err.classList.add('show'); return; }
+        if(pass !== pass2){ err.textContent = 'Passwords don\u2019t match.'; err.classList.add('show'); return; }
+        if(demoAccounts[email] && email !== profile.email){ err.textContent = 'An account with that email already exists in this demo session — try logging in.'; err.classList.add('show'); return; }
+        demoAccounts[email] = { password: pass, name };
+        profile.name = name; profile.email = email; profile.contact = email;
+        activeSteps = STEPS_SIGNUP; stepIndex = 1; render();
+      } else {
+        const email = document.getElementById('liEmail').value.trim();
+        const pass = document.getElementById('liPass').value;
+        const acc = demoAccounts[email];
+        if(!acc || acc.password !== pass){
+          err.textContent = 'No match for that email/password in this demo session.'; err.classList.add('show'); return;
+        }
+        profile.name = acc.name; profile.email = email; profile.contact = email;
+        activeSteps = STEPS_LOGIN; stepIndex = 1; render();
+      }
+    });
+  }
+
+  if(step === 'welcome'){
+    document.getElementById('launchFromLoginBtn').addEventListener('click', ()=>{ window.location.href = buildSportyUrl(); });
+    document.getElementById('freshProfileBtn').addEventListener('click', ()=>{
+      activeSteps = STEPS_SIGNUP; stepIndex = 2; render(); // skip auth+verify, go straight to personal
+    });
+  }
+
+  if(step === 'verify'){
+    const contactInput = document.getElementById('contactInput');
+    const otpInput = document.getElementById('otpInput');
+    const sendBtn = document.getElementById('sendOtpBtn');
+    const note = document.getElementById('otpNote');
+    const status = document.getElementById('otpStatus');
+    contactInput.addEventListener('input', ()=>{ profile.contact = contactInput.value; });
+
+    sendBtn.addEventListener('click', ()=>{
+      if(!contactInput.value.trim()){
+        status.textContent = 'Enter a phone number or email first.';
+        status.className = 'otp-status err';
+        return;
+      }
+      sentOtp = String(Math.floor(100000 + Math.random()*900000));
+      note.textContent = `Demo mode — no real message sent. Your code is: ${sentOtp}`;
+      note.classList.add('show');
+      otpInput.disabled = false;
+      status.textContent = '';
+      status.className = 'otp-status';
+    });
+
+    otpInput.addEventListener('input', ()=>{
+      if(otpInput.value.length === 6){
+        if(otpInput.value === sentOtp){
+          profile.otpVerified = true;
+          status.textContent = 'Verified ✓';
+          status.className = 'otp-status ok';
+        } else {
+          profile.otpVerified = false;
+          status.textContent = 'Incorrect code — check and try again.';
+          status.className = 'otp-status err';
+        }
+        document.getElementById('nextBtn').disabled = !profile.otpVerified;
+      }
+    });
+  }
+
+  if(step === 'personal'){
+    document.getElementById('ageInput').addEventListener('input', e=> profile.age = e.target.value);
+    document.getElementById('genderInput').addEventListener('change', e=> profile.gender = e.target.value);
+  }
+
+  if(step === 'body'){
+    document.getElementById('heightInput').addEventListener('input', e=> profile.height = e.target.value);
+    document.getElementById('weightInput').addEventListener('input', e=> profile.weight = e.target.value);
+  }
+
+  if(step === 'health'){
+    document.querySelectorAll('[data-field]').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        profile[chip.dataset.field] = chip.dataset.v; render();
+      });
+    });
+    const cg = document.getElementById('cautionGrid');
+    if(cg) cg.addEventListener('click', e=>{
+      const chip = e.target.closest('.chip'); if(!chip) return;
+      if(chip.dataset.v === 'None'){ profile.cautionAreas = ['None']; }
+      else { profile.cautionAreas = profile.cautionAreas.filter(v=>v!=='None'); toggleInArray(profile.cautionAreas, chip.dataset.v); }
+      render();
+    });
+    const notes = document.getElementById('healthNotes');
+    if(notes) notes.addEventListener('input', e=> profile.healthNotes = e.target.value);
+  }
+
+  if(step === 'level'){
+    document.getElementById('levelGrid').addEventListener('click', e=>{
+      const chip = e.target.closest('.chip'); if(!chip) return;
+      profile.fitnessLevel = chip.dataset.v; render();
+    });
+  }
+
+  if(step === 'goal'){
+    document.getElementById('goalGrid').addEventListener('click', e=>{
+      const chip = e.target.closest('.chip'); if(!chip) return;
+      profile.goal = chip.dataset.v; render();
+    });
+  }
+
+  if(step === 'preference'){
+    document.getElementById('prefGrid').addEventListener('click', e=>{
+      const chip = e.target.closest('.chip'); if(!chip) return;
+      toggleInArray(profile.preferences, chip.dataset.v); render();
+    });
+  }
+
+  if(step === 'targets'){
+    document.getElementById('targetGrid').addEventListener('click', e=>{
+      const chip = e.target.closest('.chip'); if(!chip) return;
+      toggleInArray(profile.targetExercises, chip.dataset.v); render();
+    });
+  }
+
+  if(step === 'duration'){
+    document.getElementById('durationGrid').addEventListener('click', e=>{
+      const chip = e.target.closest('.chip'); if(!chip) return;
+      const v = chip.dataset.v;
+      profile.duration = v === 'Custom' ? 'custom' : v.split(' ')[0];
+      render();
+    });
+    const cd = document.getElementById('customDurationInput');
+    if(cd) cd.addEventListener('input', e=> profile.customDuration = e.target.value);
+  }
+
+  if(step === 'experience'){
+    document.getElementById('experienceGrid').addEventListener('click', e=>{
+      const chip = e.target.closest('.chip'); if(!chip) return;
+      profile.experience = chip.dataset.v; render();
+    });
+  }
+
+  if(step === 'camera'){
+    document.getElementById('cameraGrid').addEventListener('click', e=>{
+      const chip = e.target.closest('.chip'); if(!chip) return;
+      profile.camera = chip.dataset.v; render();
+    });
+  }
+
+  if(step === 'profile'){
+    document.getElementById('avatarRow').addEventListener('click', e=>{
+      const av = e.target.closest('.avatar'); if(!av) return;
+      profile.avatar = av.dataset.v; render();
+    });
+    document.getElementById('remindersSwitch').addEventListener('click', ()=>{
+      profile.reminders = !profile.reminders; render();
+    });
+    document.getElementById('unitMetric').addEventListener('click', ()=>{ profile.units='metric'; render(); });
+    document.getElementById('unitImperial').addEventListener('click', ()=>{ profile.units='imperial'; render(); });
+  }
+
+  if(step === 'summary'){
+    document.getElementById('launchBtn').addEventListener('click', ()=>{
+      window.location.href = buildSportyUrl();
+    });
+  }
+}
+
+render();
+</script>
+</body>
+</html>

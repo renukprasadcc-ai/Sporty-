@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sporty — AI Movement Coach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>SPO<span>RTY</span></h1>
+    <div class="tag" id="welcomeTag" style="display:none;"></div>
+  </header>
+
+  <div class="layout">
+
+    <!-- LEFT: camera + skeleton -->
+    <div>
+      <div class="panel">
+        <div class="controls-row" id="sourceToggle" style="margin-top:0;">
+          <button class="mode-btn active" data-src="live">Live camera</button>
+          <button class="mode-btn" data-src="upload">Upload video</button>
+        </div>
+
+        <div class="stage" id="stage" style="margin-top:12px;">
+          <video id="video" autoplay playsinline muted></video>
+          <canvas id="overlay"></canvas>
+          <div class="hud">
+            <div class="reps">
+              <div class="num" id="repCount">0</div>
+              <div class="lbl" id="repLabel">reps</div>
+              <div class="score" id="scoreLbl">form —</div>
+              <div class="score" id="goodBadLbl">0 good · 0 bad</div>
+            </div>
+            <div class="form-msg" id="formMsg" style="display:none;"></div>
+          </div>
+          <div class="empty-state" id="emptyState">
+            <h3 style="margin:0; font-size:16px; color:var(--ink);">Camera is off</h3>
+            <p id="emptyStateText">Sporty needs camera access to detect your joints and count reps. Nothing is recorded or sent anywhere — pose tracking runs locally in your browser.</p>
+            <button class="primary" id="startBtn">Start camera</button>
+            <label class="primary" id="uploadBtn" for="videoFileInput" style="display:none; cursor:pointer;">Choose video file</label>
+            <input type="file" id="videoFileInput" accept="video/*" style="display:none;">
+          </div>
+        </div>
+
+        <div class="controls-row" id="sectionToggle" style="margin-top:14px;">
+          <button class="mode-btn active" data-section="exercise">🏋️ Exercise</button>
+          <button class="mode-btn" data-section="yoga">🧘 Yoga</button>
+        </div>
+
+        <div id="exerciseSection">
+          <div class="exercise-grid" id="exerciseGrid">
+            <button class="ex-btn active" data-ex="squat">Squat<small>hip · knee · ankle</small></button>
+            <button class="ex-btn" data-ex="pushup">Push-up<small>shoulder · elbow · wrist</small></button>
+            <button class="ex-btn" data-ex="curl">Bicep curl<small>shoulder · elbow · wrist</small></button>
+            <button class="ex-btn" data-ex="plank">Plank hold<small>shoulder · hip · ankle</small></button>
+            <button class="ex-btn" data-ex="lunge">Lunge<small>hip · knee · ankle</small></button>
+            <button class="ex-btn" data-ex="overhead">Overhead press<small>hip · shoulder · wrist</small></button>
+          </div>
+        </div>
+
+        <div id="yogaSection" style="display:none;">
+          <div class="exercise-grid" id="yogaPoseGrid" style="grid-template-columns:repeat(2,1fr);">
+            <button class="ex-btn" data-ex="tree">Tree Pose<small>balance hold</small></button>
+            <button class="ex-btn" data-ex="warrior2">Warrior II<small>front knee · arms wide</small></button>
+          </div>
+          <p class="field-note">Hold poses above are tracked just like an exercise — pick one, or flow through a full guided sequence below.</p>
+
+          <div class="exercise-grid" id="flowPicker" style="grid-template-columns:1fr; margin-top:14px;">
+            <button class="ex-btn active" data-flow="surya">Surya Namaskar<small>12-step sun salutation, guided by voice + timer</small></button>
+          </div>
+
+          <div id="flowPlayer" style="display:none; margin-top:12px;">
+            <div class="flow-dots" id="flowDots"></div>
+            <div class="flow-title" id="flowStepName">—</div>
+            <p class="flow-instruction" id="flowStepText">—</p>
+            <div class="flow-timer" id="flowTimer">5</div>
+            <div class="conn-status" id="flowHint">step 1 of 12</div>
+            <div class="controls-row">
+              <button class="ghost" id="flowPrevBtn">◀ Prev</button>
+              <button id="flowPauseBtn">Pause</button>
+              <button class="ghost" id="flowNextBtn">Next ▶</button>
+            </div>
+            <div class="controls-row">
+              <button class="ghost" id="flowEndBtn">End flow</button>
+            </div>
+          </div>
+
+          <div class="controls-row" id="flowStartRow">
+            <button class="primary" id="flowStartBtn">Start Surya Namaskar</button>
+          </div>
+          <p class="field-note">Standing steps (mountain pose, forward fold, arms overhead) get a light "in position" check from your camera. Floor poses (plank, cobra, downward dog) are paced by voice + timer only — a front-on camera can't reliably read them from a standing setup.</p>
+        </div>
+
+        <div class="controls-row" id="holdTargetRow" style="display:none;">
+          <label class="field-label" for="holdTargetInput" style="align-self:center; margin:0;">Target hold (sec)</label>
+          <input type="number" id="holdTargetInput" min="5" max="300" value="30" style="width:70px; background:var(--panel-2); border:1px solid var(--line); color:var(--ink); padding:8px 10px; border-radius:var(--radius);">
+        </div>
+
+        <div class="controls-row" id="repsControlsRow">
+          <button id="toggleBtn" disabled>Pause tracking</button>
+          <button id="finishSetBtn" disabled>Finish set</button>
+          <button class="ghost" id="resetBtn" disabled>Reset reps</button>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:16px;">
+        <div class="section-title">Progress <small id="progressScope">week & month totals</small></div>
+        <div class="progress-grid">
+          <div class="progress-card">
+            <div class="progress-label">This week</div>
+            <div id="weekStats">—</div>
+          </div>
+          <div class="progress-card">
+            <div class="progress-label">This month</div>
+            <div id="monthStats">—</div>
+          </div>
+        </div>
+        <canvas id="progressChart" width="360" height="130" style="width:100%; height:130px; margin-top:12px;"></canvas>
+        <p class="field-note" id="progressNote">Today's set-by-set detail is kept only for today and clears automatically tomorrow. These weekly/monthly totals persist.</p>
+      </div>
+
+      <div class="panel" style="margin-top:16px;">
+        <div class="section-title">Readiness <small>manual check-in — stands in for a wearable feed</small></div>
+        <div class="readiness-grid">
+          <div>
+            <label class="field-label" for="sleepInput">Sleep last night (hrs)</label>
+            <input type="number" id="sleepInput" min="0" max="14" step="0.5" value="7">
+          </div>
+          <div>
+            <label class="field-label" for="sorenessInput">Muscle soreness</label>
+            <select id="sorenessInput">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="hrInput">Resting heart rate (optional)</label>
+            <input type="number" id="hrInput" min="30" max="140" placeholder="bpm">
+          </div>
+        </div>
+        <div class="readiness-out" id="readinessOut">
+          <span class="readiness-score" id="readinessScore">70</span>
+          <span id="readinessText" style="display:none;">Update your check-in to get today's target.</span>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:16px;">
+        <div class="section-title">Workout history <small id="historyScope">this browser session only</small></div>
+        <div class="streak-row" id="streakRow">
+          <span id="streakBadge">🔥 — day streak</span>
+          <span id="pbBadge">Personal best: —</span>
+        </div>
+        <div class="history-stats" id="historyStats">No sets yet.</div>
+        <ul class="set-log" id="setLog">
+          <li class="empty">No sets logged yet — finish a set to record it here.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- RIGHT: pipeline + coach -->
+    <div>
+      <div class="panel" style="display:none;">
+        <div class="section-title">How Sporty sees you</div>
+        <table class="pipeline">
+          <tr><th>Part</th><th>Technology</th><th>Live value</th></tr>
+          <tr><td>Camera</td><td>getUserMedia</td><td class="mono" id="liveFps">—</td></tr>
+          <tr><td>Joint detection</td><td>MediaPipe Pose</td><td class="mono" id="liveLandmarks">—</td></tr>
+          <tr><td>Joint accuracy</td><td>Landmark confidence</td><td class="mono" id="liveConfidence">—</td></tr>
+          <tr><td>Skeleton</td><td>Canvas overlay</td><td class="mono" id="liveVisible">—</td></tr>
+          <tr><td>Mathematics</td><td>Vector geometry</td><td class="mono" id="liveAngle">—°</td></tr>
+          <tr><td>Exercise logic</td><td>Angle state machine</td><td class="mono" id="livePhase">—</td></tr>
+          <tr><td>3D posture</td><td>World landmarks</td><td class="mono" id="livePosture">—</td></tr>
+          <tr><td>Velocity</td><td>Δposition / Δt</td><td class="mono" id="liveVelocity">—</td></tr>
+          <tr><td>L/R symmetry</td><td>Bilateral angle diff</td><td class="mono" id="liveSymmetry">—</td></tr>
+          <tr><td>Range of motion</td><td>Angle min → max this set</td><td class="mono" id="liveROM">—</td></tr>
+          <tr><td>Duration</td><td>Session clock</td><td class="mono" id="liveDuration">00:00</td></tr>
+          <tr><td>Calories</td><td>MET × weight × time</td><td class="mono" id="liveCalories">0 kcal</td></tr>
+          <tr><td>Conversation</td><td id="pipelineLLM">Offline rules</td><td class="mono" id="connDot">●</td></tr>
+        </table>
+      </div>
+
+      <div class="panel" style="margin-top:16px; display:none;">
+        <div class="section-title">3D posture <small>drag to rotate · simplified body, not raw dots</small></div>
+        <canvas id="canvas3d" width="400" height="260" style="width:100%; aspect-ratio:16/10; background:#0B0A08; border:1px solid var(--line); touch-action:none; cursor:grab;"></canvas>
+        <div class="controls-row">
+          <button class="ghost" id="calibrateBtn">Calibrate neutral posture</button>
+          <span class="conn-status" id="postureBadge">stand still, then calibrate</span>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:16px;">
+        <div class="section-title">Skeleton display <small>choose what's drawn on screen</small></div>
+        <p class="field-note" style="margin-top:0;">Tracking still runs underneath either way — this only controls what you see. Face points off by default since they're not used for any exercise and just clutter close-up moves like push-ups.</p>
+        <div class="chip-row" id="skeletonToggles">
+          <button class="chip" data-group="face">Face</button>
+          <button class="chip active" data-group="torso">Torso</button>
+          <button class="chip active" data-group="arms">Arms</button>
+          <button class="chip" data-group="hands">Hands / fingers</button>
+          <button class="chip active" data-group="legs">Legs</button>
+          <button class="chip active" data-group="feet">Feet</button>
+        </div>
+        <div class="controls-row">
+          <button class="ghost" id="skeletonShowAll">Show all</button>
+          <button class="ghost" id="skeletonHideAll">Hide all</button>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:16px;">
+        <div class="section-title">Body profile <small>used to tune targets, not stored anywhere</small></div>
+        <div class="readiness-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div>
+            <label class="field-label" for="ageInput">Age</label>
+            <input type="number" id="ageInput" min="10" max="99" value="30">
+          </div>
+          <div>
+            <label class="field-label" for="heightInput">Height (cm)</label>
+            <input type="number" id="heightInput" min="120" max="220" value="170">
+          </div>
+          <div>
+            <label class="field-label" for="weightInput">Weight (kg)</label>
+            <input type="number" id="weightInput" min="30" max="200" value="70">
+          </div>
+        </div>
+        <p class="field-note" id="hrZoneNote">Estimated max heart rate and a moderate-intensity training zone appear here once you enter your age. This is a general formula (220 − age), not medical guidance.</p>
+      </div>
+
+      <div class="panel" style="margin-top:16px;">
+        <div class="section-title">Connection <small>choose how the coach thinks</small></div>
+
+        <div class="controls-row" id="modeToggle" style="margin-top:0;">
+          <button class="mode-btn active" data-mode="offline">Offline (built-in rules)</button>
+          <button class="mode-btn" data-mode="online">Online (OpenRouter)</button>
+        </div>
+
+        <div id="onlinePanel" style="display:none; margin-top:12px;">
+          <label class="field-label" for="apiKeyInput">OpenRouter API key</label>
+          <div class="key-row">
+            <input id="apiKeyInput" type="password" placeholder="sk-or-v1-…" autocomplete="off">
+            <button class="ghost" id="toggleKeyVis" type="button">Show</button>
+          </div>
+
+          <label class="field-label" for="modelSelect" style="margin-top:10px;">Model</label>
+          <select id="modelSelect"></select>
+
+          <div class="controls-row">
+            <button id="testConnBtn" class="ghost">Test connection</button>
+            <span id="connStatus" class="conn-status">Not connected</span>
+          </div>
+
+          <p class="field-note">Key stays in memory for this tab only — it's never saved to disk and isn't sent anywhere except OpenRouter. Refresh the page and you'll need to re-enter it.</p>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:16px;">
+        <div class="section-title">Coach <small>ask about form, soreness, or pacing</small></div>
+        <div class="coach-log" id="coachLog">
+          <div class="msg coach">I'm Sporty. Start your camera, pick a movement, and I'll count reps and watch your form. Ask me anything once you've done a set or two.</div>
+        </div>
+        <div class="coach-input">
+          <input id="coachInput" type="text" placeholder="e.g. why does my form message say knees caving in?">
+          <button id="coachSend">Ask</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="note">
+    Pose landmarks are processed on-device via MediaPipe; video never leaves your browser. Rep counting is a threshold state
+    machine over joint angles (numpy-style vector math, ported to JS). Coaching runs Offline by default using built-in
+    rules — switch to Online in the Connection panel and add an OpenRouter API key to route coaching through a real LLM
+    of your choice. The key lives only in this tab's memory and is sent solely to OpenRouter. Session history lives in
+    memory for this tab only; wire the same schema into a small SQLite backend to persist it across visits, as sketched
+    in the original architecture.
+  </footer>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
+
