@@ -1,19 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Sporty — AI Movement Coach</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>Sporty</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+<link rel="stylesheet" href="css/onboarding.css">
+<link rel="stylesheet" href="css/team.css">
+
+<div id="obView">
+<div class="obwrap">
+<header class="obtop">
+    <h1>SPO<span>RTY</span></h1>
+    <p>Account setup and training profile</p>
+  </header>
+
+  <div class="ob-hero" id="obHero"><img src="img/hero.webp" alt="Sporty AI training coach"></div>
+
+  <div class="progress-track" id="progressTrack"></div>
+
+  <div class="card" id="stepCard"></div>
+
+  <p class="disclaimer">This is a prototype login with no password server: the demo OTP is shown on screen. Your name, avatar, goal and workout totals are shared with your team. Health notes, age and weight stay private to your own account.</p>
+</div>
+</div>
+</div>
+
+<div id="appView" hidden>
 <div class="wrap">
 
   <header class="top">
     <h1>SPO<span>RTY</span></h1>
     <div class="tag" id="welcomeTag" style="display:none;"></div>
+    <button class="ghost" id="signOutBtn" type="button">Sign out</button>
   </header>
 
   <div class="layout">
@@ -37,6 +54,7 @@
               <div class="score" id="goodBadLbl">0 good · 0 bad</div>
             </div>
             <div class="form-msg" id="formMsg" style="display:none;"></div>
+            <div class="cue-msg" id="cueMsg" style="display:none;" aria-live="polite"></div>
           </div>
           <div class="empty-state" id="emptyState">
             <h3 style="margin:0; font-size:16px; color:var(--ink);">Camera is off</h3>
@@ -106,6 +124,19 @@
           <button id="finishSetBtn" disabled>Finish set</button>
           <button class="ghost" id="resetBtn" disabled>Reset reps</button>
         </div>
+
+        <div class="controls-row voice-row" id="voiceRow">
+          <button id="voiceBtn" type="button">Voice coach: On</button>
+          <label class="voice-speed" for="voiceRate">Speed
+            <select id="voiceRate">
+              <option value="0.9">Slow</option>
+              <option value="1.05" selected>Normal</option>
+              <option value="1.2">Fast</option>
+            </select>
+          </label>
+          <button class="ghost" id="voiceTestBtn" type="button">Test voice</button>
+        </div>
+        <p class="field-note" id="voiceNote">The coach says each instruction out loud, names mistakes as they happen, and praises good reps. Everything it says also shows on screen.</p>
       </div>
 
       <div class="panel" style="margin-top:16px;">
@@ -163,8 +194,22 @@
       </div>
     </div>
 
-    <!-- RIGHT: pipeline + coach -->
+    <!-- RIGHT: team + pipeline + coach -->
     <div>
+      <div class="panel" id="teamPanel">
+        <div class="section-title">Team <small id="teamStatus">connecting…</small></div>
+        <div class="t-goal">
+          <div class="t-goal-top"><span>Weekly team goal</span><b id="teamGoalText">0 / 500 reps this week</b></div>
+          <div class="t-goal-track"><div class="t-goal-fill" id="teamGoalBar"></div></div>
+        </div>
+        <div class="t-sub">Live now</div>
+        <div class="t-live" id="teamLive"></div>
+        <div class="t-sub">This week</div>
+        <ol class="t-board" id="teamBoard"></ol>
+        <div class="t-sub">Activity</div>
+        <ul class="t-feed" id="teamFeed"></ul>
+        <p class="field-note">Teammates see your name, avatar, goal and workout totals. Health notes, age and weight stay private to you.</p>
+      </div>
       <div class="panel" style="display:none;">
         <div class="section-title">How Sporty sees you</div>
         <table class="pipeline">
@@ -280,8 +325,12 @@
     in the original architecture.
   </footer>
 </div>
+</div>
 
+<div class="t-toast" id="teamToast" hidden></div>
+
+<script src="js/storage-shim.js"></script>
+<script src="js/onboarding.js"></script>
 <script type="module" src="js/app.js"></script>
-</body>
-</html>
-
+<script type="module" src="js/team.js"></script>
+</body></html>

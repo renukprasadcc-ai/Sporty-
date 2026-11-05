@@ -174,7 +174,7 @@ function toggleInArray(arr, val){
   if(i>-1) arr.splice(i,1); else arr.push(val);
 }
 
-/* Builds the URL that hands off to sporty.html. Only sends fields Sporty
+/* Builds the URL that hands off to index.html. Only sends fields Sporty
    actually has matching controls for (age/height/weight in its Body
    Profile panel, and one exercise/pose to preselect) — fields with no
    equivalent in Sporty (fitness level, goal, duration, camera side, etc.)
@@ -187,7 +187,7 @@ function buildSportyUrl(){
   if(profile.weight) p.set('weight', profile.weight);
   if(profile.targetExercises.length) p.set('exercise', profile.targetExercises[0].toLowerCase());
   const qs = p.toString();
-  return 'sporty.html' + (qs ? ('?' + qs) : '');
+  return 'index.html' + (qs ? ('?' + qs) : '');
 }
 
 function navButtons(nextLabel, nextEnabled, opts){
